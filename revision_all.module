@@ -77,7 +77,8 @@ function revision_all_settings_form() {
 
   $form['revision-all']['prevent-override'] = array(
     '#title' => 'Prevent Revisioning Overrides',
-    '#description' => 'Removes the "create revision" checkbox from node forms.',
+    '#description' => 'Disables the "create revision" checkbox from node
+      forms.',
     '#type' => 'checkbox',
     '#default_value' => $settings['prevent-override'],
   );
@@ -148,7 +149,7 @@ function revision_all_form_node_type_form_alter(&$form, &$form_state) {
  * Implements hook_form_alter().
  *
  * If the "Prevent Revisioning Overrides" setting is checked, node forms are
- * altered to remove access to the "Create new revision" checkbox.
+ * altered to disable access to the "Create new revision" checkbox.
  */
 function revision_all_form_alter(&$form, &$form_state, $form_id) {
   $settings = variable_get('revision_all', array());
