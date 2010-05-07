@@ -7,19 +7,18 @@
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function revision_all_install() {
   $defaults['revision-all']  = TRUE;
   $defaults['enable-future'] = TRUE;
+  $defaults['prevent-override'] = FALSE;
 
   variable_set('revision_all', $defaults);
-
-  $revision_all_link = l('Revision All', 'admin/content/revision-all');
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function revision_all_uninstall() {
   variable_del('revision_all');

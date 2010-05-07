@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function revision_all_menu() {
   $items['admin/content/revision-all'] = array(
@@ -52,8 +52,8 @@ function revision_all_settings_form() {
     '#attributes' => array('id' => 'revision-all-revision-types'),
   );
 
-  foreach ($content_types as $type) {
-    $key = drupal_strtolower($type);
+  while ($type = current($content_types)) {
+    $key = key($content_types);
     $type_settings = variable_get("node_options_$key", array());
 
     $default_value = in_array('revision', $type_settings);
@@ -63,6 +63,8 @@ function revision_all_settings_form() {
       '#type' => 'checkbox',
       '#default_value' => $default_value,
     );
+
+    next($content_types);
   }
 
   $form['revision-all']['enable-future'] = array(
@@ -97,6 +99,7 @@ function revision_all_settings_form() {
  *  The state of the form upon submission.
  */
 function revision_all_settings_form_submit(&$form, &$form_state) {
+  $content_types = node_get_types('names');
   $revision_all = $form_state['values']['revision-all']['revision-all'];
   $revision_types = $form_state['values']['revision-all']['revision-types'];
 
@@ -104,11 +107,12 @@ function revision_all_settings_form_submit(&$form, &$form_state) {
 
   variable_set('revision_all', $form_state['values']['revision-all']);
 
-  while ($key = key($revision_types)) {
-    $settings_key = 'node_options_' . drupal_strtolower($key);
+  while ($type = current($content_types)) {
+    $key = key($content_types);
+    $settings_key = "node_options_$key";
     $type_settings = variable_get($settings_key, array());
 
-    $should_revision = $revision_all || $revision_types[$key];
+    $should_revision = $revision_all || $revision_types[$type];
     $currently_revision = array_search('revision', $type_settings);
 
     if ($should_revision && $currently_revision === FALSE) {
@@ -120,14 +124,14 @@ function revision_all_settings_form_submit(&$form, &$form_state) {
 
     variable_set($settings_key, $type_settings);
 
-    next($revision_types);
+    next($content_types);
   }
 
-  drupal_set_message('Revisioning Set');
+  drupal_set_message(t('Revisioning Set'));
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  *
  * If the "Enable for all future content types" setting is checked, the node
  * type form is altered to set "Create new revision" by default.
@@ -141,15 +145,15 @@ function revision_all_form_node_type_form_alter(&$form, &$form_state) {
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  *
  * If the "Prevent Revisioning Overrides" setting is checked, node forms are
  * altered to remove access to the "Create new revision" checkbox.
  */
-function revision_all_form_alter(&$form, $form_state, $form_id) {
+function revision_all_form_alter(&$form, &$form_state, $form_id) {
   $settings = variable_get('revision_all', array());
 
   if ($settings['prevent-override'] && $form['#id'] == 'node-form') {
-    $form['revision_information']['revision']['#access'] = FALSE;
+    $form['revision_information']['revision']['#disabled'] = TRUE;
   }
 }
