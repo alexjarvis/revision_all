@@ -1,0 +1,26 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install, update and uninstall functions for the revision all module.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function revision_all_install() {
+  $defaults['revision-all']  = TRUE;
+  $defaults['enable-future'] = TRUE;
+
+  variable_set('revision_all', $defaults);
+
+  $revision_all_link = l('Revision All', 'admin/content/revision-all');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function revision_all_uninstall() {
+  variable_del('revision_all');
+}
