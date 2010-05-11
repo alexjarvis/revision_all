@@ -2,3 +2,5 @@
 name = "Revision All"
 description = "Enables centralized revisioning of content"
 core = 6.x
+files[] = revision_all.module
+files[] = revision_all.install
