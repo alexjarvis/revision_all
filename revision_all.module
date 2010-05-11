@@ -38,16 +38,16 @@ function revision_all_settings_form() {
   );
 
   $form['revision-all']['revision-all'] = array(
-    '#title' => 'Revision All',
-    '#description' => 'Enable revisioning for all content types.',
+    '#title' => t('Revision All'),
+    '#description' => t('Enable revisioning for all content types.'),
     '#type' => 'checkbox',
     '#default_value' => $settings['revision-all'],
   );
 
   $form['revision-all']['revision-types'] = array(
-    '#title' => 'Revisioning By Content Type',
-    '#description' => 'Select the content types you would like revisioned.
-      <em>Note</em>: Selecting "Revision All" above overrides these settings.',
+    '#title' => t('Revisioning By Content Type'),
+    '#description' => t('Select the content types you would like revisioned.
+      <em>Note</em>: Selecting "Revision All" above overrides these settings.'),
     '#type' => 'fieldset',
     '#attributes' => array('id' => 'revision-all-revision-types'),
   );
@@ -59,7 +59,7 @@ function revision_all_settings_form() {
     $default_value = in_array('revision', $type_settings);
 
     $form['revision-all']['revision-types'][$type] = array(
-      '#title' => $type,
+      '#title' => t($type),
       '#type' => 'checkbox',
       '#default_value' => $default_value,
     );
@@ -68,24 +68,24 @@ function revision_all_settings_form() {
   }
 
   $form['revision-all']['enable-future'] = array(
-    '#title' => 'Enable for all future content types',
-    '#description' => 'Automatically checks the "Create new revision" checkbox
-      when creating new content types.',
+    '#title' => t('Enable for all Future Content Types'),
+    '#description' => t('Automatically checks the "Create new revision" checkbox
+      when creating new content types.'),
     '#type' => 'checkbox',
     '#default_value' => $settings['enable-future'],
   );
 
   $form['revision-all']['prevent-override'] = array(
-    '#title' => 'Prevent Revisioning Overrides',
-    '#description' => 'Disables the "create revision" checkbox from node
-      forms.',
+    '#title' => t('Prevent Revisioning Overrides'),
+    '#description' => t('Disables the "create revision" checkbox from node
+      forms.'),
     '#type' => 'checkbox',
     '#default_value' => $settings['prevent-override'],
   );
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Save configuration',
+    '#value' => t('Save configuration'),
   );
 
   return $form;
@@ -134,7 +134,7 @@ function revision_all_settings_form_submit(&$form, &$form_state) {
 /**
  * Implements hook_form_alter().
  *
- * If the "Enable for all future content types" setting is checked, the node
+ * If the "Enable for all Future Content Types" setting is checked, the node
  * type form is altered to set "Create new revision" by default.
  */
 function revision_all_form_node_type_form_alter(&$form, &$form_state) {
@@ -148,13 +148,22 @@ function revision_all_form_node_type_form_alter(&$form, &$form_state) {
 /**
  * Implements hook_form_alter().
  *
+ * If the "Revision All" setting is checked, check the "Create new revision"
+ * checkbox.
+ *
  * If the "Prevent Revisioning Overrides" setting is checked, node forms are
  * altered to disable access to the "Create new revision" checkbox.
  */
 function revision_all_form_alter(&$form, &$form_state, $form_id) {
   $settings = variable_get('revision_all', array());
 
-  if ($settings['prevent-override'] && $form['#id'] == 'node-form') {
-    $form['revision_information']['revision']['#disabled'] = TRUE;
+  if ($form['#id'] == 'node-form') {
+    if ($settings['revision-all']) {
+      $form['revision_information']['revision']['#default_value'] = TRUE;
+    }
+
+    if ($settings['prevent-override']) {
+      $form['revision_information']['revision']['#disabled'] = TRUE;
+    }
   }
 }
