@@ -80,7 +80,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
     $this->drupalLogin($privileged_user);
   }
 
-  function testRevisionAllBaseCreate() {
+  function testRevisionAllBase() {
     $this->drupalGet('node/add/page');
 
     $this->assertFieldChecked('edit-revision', 'Page revisioning set');
@@ -90,27 +90,25 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
     $this->assertFieldChecked('edit-revision', 'Story revisioning set');
   }
 
-  function testRevisionAllBaseEdit() {
-    //$this->fail('Incomplete');
+  function testRevisionAllDrupalType() {
+    $settings = array(
+      'type' => 'custom_content',
+    );
+
+    $this->drupalCreateContentType($settings);
+
+    $this->drupalGet('node/add/custom-content');
+
+    $this->assertFieldChecked('edit-revision', 'Custom Content revisioning set');
   }
 
-  function testRevisionAllDrupalTypeCreate() {
-    //$this->fail('Incomplete');
+  function testRevisionAllModuleType() {
+    $this->drupalGet('node/add/revision-all-test');
+
+    $this->assertFieldChecked('edit-revision', 'Revision All revisioning set');
   }
 
-  function testRevisionAllDrupalTypeEdit() {
-    //$this->fail('Incomplete');
-  }
-
-  function testRevisionAllModuleTypeCreate() {
-    //$this->fail('Incomplete');
-  }
-
-  function testRevisionAllModuleTypeEdit() {
-    //$this->fail('Incomplete');
-  }
-
-  function testRevisionSelectBaseTypeCreate() {
+  function testRevisionSelectBaseType() {
     $settings = get_settings(FALSE, TRUE, TRUE);
     $settings['revision-all[revision-types][Page]'] = FALSE;
 
@@ -120,44 +118,58 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $this->assertNoFieldChecked('edit-revision', 'Page revisioning set');
 
-    $this->drupalGet('node/add/story');
-
-    $this->assertFieldChecked('edit-revision', 'Story revisioning set');
-  }
-
-  function testRevisionSelectBaseTypeEdit() {
-    $settings = get_settings(FALSE, TRUE, TRUE);
-    $settings['revision-all[revision-types][Page]'] = FALSE;
+    $settings['revision-all[revision-types][Page]'] = TRUE;
 
     $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
 
-    $node = $this->drupalCreateNode(array('type' => 'page'));
-
-    $this->drupalGet("node/{$node->nid}/edit");
-
-    $this->assertNoFieldChecked('edit-revision', 'Page revisioning set');
-
-    $node = $this->drupalCreateNode(array('type' => 'story'));
-
-    $this->drupalGet("node/{$node->nid}/edit");
+    $this->drupalGet('node/add/page');
 
     $this->assertFieldChecked('edit-revision', 'Page revisioning set');
   }
 
-  function testRevisionSelectDrupalTypeCreate() {
-    //$this->fail('Incomplete');
+  function testRevisionSelectDrupalType() {
+    $settings = array(
+      'name' => 'Custom Content',
+      'type' => 'custom_content',
+    );
+
+    $this->drupalCreateContentType($settings);
+
+    $settings = get_settings(FALSE, TRUE, TRUE);
+    $settings['revision-all[revision-types][custom_content]'] = FALSE;
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+
+    $this->drupalGet('node/add/custom-content');
+
+    $this->assertNoFieldChecked('edit-revision', 'Custom Content revisioning set');
+
+    $settings['revision-all[revision-types][custom_content]'] = TRUE;
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+
+    $this->drupalGet('node/add/custom-content');
+
+    $this->assertFieldChecked('edit-revision', 'Custom Content revisioning set');
   }
 
-  function testRevisionSelectDrupalTypeEdit() {
-    //$this->fail('Incomplete');
-  }
+  function testRevisionSelectModuleType() {
+    $settings = get_settings(FALSE, TRUE, TRUE);
+    $settings['revision-all[revision-types][revision_all]'] = FALSE;
 
-  function testRevisionSelectModuleTypeCreate() {
-    //$this->fail('Incomplete');
-  }
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
 
-  function testRevisionSelectModuleTypeEdit() {
-    //$this->fail('Incomplete');
+    $this->drupalGet('node/add/revision-all-test');
+
+    $this->assertNoFieldChecked('edit-revision', 'Revision All revisioning set');
+
+    $settings['revision-all[revision-types][revision_all]'] = TRUE;
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+
+    $this->drupalGet('node/add/revision-all-test');
+
+    $this->assertFieldChecked('edit-revision', 'Revision All revisioning set');
   }
 }
 
@@ -214,58 +226,28 @@ class RevisionAllPreventOverrideTests extends RevisionAllBase {
     $this->assertRaw('<input type="checkbox" name="revision" id="edit-revision" value="1"  checked="checked"  disabled="disabled" class="form-checkbox" />', $caller . ': "Create new revision" disabled');
   }
 
-  function create_custom_content_type($type = 'custom_content') {
-    $settings = array(
-      'type' => $type,
-    );
 
-    $this->drupalCreateContentType($settings);
-
-    return $settings;
-  }
-
-  function testPreventsBaseContentTypeCreate() {
+  function testPreventsBaseType() {
     $this->drupalGet('node/add/page');
 
     $this->has_disabled_revisions();
   }
 
-  function testPreventBaseContentTypeEdit() {
-    $node = $this->drupalCreateNode(array('type' => 'page'));
+  function testPreventsDrupalType() {
+    $settings = array(
+      'name' => 'Custom Content',
+      'type' => 'custom_content',
+    );
 
-    $this->drupalGet("node/{$node->nid}/edit");
-
-    $this->has_disabled_revisions();
-  }
-
-  function testPreventsDrupalCustomContentTypeCreate() {
-    $this->create_custom_content_type();
+    $this->drupalCreateContentType($settings);
 
     $this->drupalGet('node/add/custom-content');
 
     $this->has_disabled_revisions();
   }
 
-  function testPreventsDrupalCustomContentTypeEdit() {
-    $settings = $this->create_custom_content_type();
-
-    $node = $this->drupalCreateNode($settings);
-
-    $this->drupalGet("node/{$node->nid}/edit");
-
-    $this->has_disabled_revisions();
-  }
-
-  function testPreventsModuleCustomContentTypeCreate() {
+  function testPreventsModuleType() {
     $this->drupalGet('node/add/revision-all-test');
-
-    $this->has_disabled_revisions();
-  }
-
-  function testPreventsModuleCustomContentTypeEdit() {
-    $node = $this->drupalCreateNode(array('type' => 'revision_all_test'));
-
-    $this->drupalGet("node/{$node->nid}/edit");
 
     $this->has_disabled_revisions();
   }
