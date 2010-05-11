@@ -15,24 +15,28 @@ function get_settings($revision_all = TRUE, $enable_future = TRUE, $prevent_over
   return $settings;
 }
 
+class RevisionAllBase extends DrupalWebTestCase {
+  public function setUp() {
+    parent::setUp('revision_all', 'revision_all_test');
+
+    $privileged_user = $this->drupalCreateUser(
+      array('administer site configuration'));
+    $this->drupalLogin($privileged_user);
+
+    $this->drupalPost('admin/content/revision-all', get_settings(), 'Save configuration');
+  }
+}
+
 /**
  * Tests the basic Revision All settings.
  */
-class RevisionAllBasicTests extends DrupalWebTestCase {
+class RevisionAllBasicTests extends RevisionAllBase {
   public static function getInfo() {
     return array(
       'name' => 'Revision All Base',
       'description' => 'Tests to ensure the Revision All settings work correctly.',
       'group' => 'Revision All',
     );
-  }
-
-  public function setUp() {
-    parent::setUp('revision_all', 'revision_all_test');
-
-    $privileged_user = $this->drupalCreateUser(array('administer site configuration'));
-    $this->drupalLogin($privileged_user);
-    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
   }
 
   function testSettingsAccessible() {
@@ -42,7 +46,7 @@ class RevisionAllBasicTests extends DrupalWebTestCase {
 
     $this->assertFieldChecked('edit-revision-all-revision-all', '"Revision All" Checked');
     $this->assertFieldChecked('edit-revision-all-enable-future', '"Enable for all Future Content Types" checked');
-    $this->assertNoFieldChecked('edit-revision-all-prevent-override', '"Prevent Revisioning Overrides" unchecked');
+    $this->assertFieldChecked('edit-revision-all-prevent-override', '"Prevent Revisioning Overrides" unchecked');
   }
 
   function testSettingsSaving() {
@@ -61,7 +65,7 @@ class RevisionAllBasicTests extends DrupalWebTestCase {
   }
 }
 
-class RevisionAllTypeRevisioningTests extends DrupalWebTestCase {
+class RevisionAllTypeRevisioningTests extends RevisionAllBase {
   public static function getInfo() {
     return array(
       'name' => 'Type Revisioning Tests',
@@ -71,17 +75,12 @@ class RevisionAllTypeRevisioningTests extends DrupalWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp('revision_all', 'revision_all_test');
-
-    $privileged_user = $this->drupalCreateUser(
-      array('administer site configuration', 'administer nodes'));
+    parent::setUp();
+    $privileged_user = $this->drupalCreateUser(array('administer site configuration' , 'administer nodes'));
     $this->drupalLogin($privileged_user);
-    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
   }
 
-  /** Revision All & Subsection **/
-  //Test Revision All behavior
-  function testRevisionAllBaseTypes() {
+  function testRevisionAllBaseCreate() {
     $this->drupalGet('node/add/page');
 
     $this->assertFieldChecked('edit-revision', 'Page revisioning set');
@@ -91,16 +90,82 @@ class RevisionAllTypeRevisioningTests extends DrupalWebTestCase {
     $this->assertFieldChecked('edit-revision', 'Story revisioning set');
   }
 
-  function testRevisionAllCustomType() {
-    //todo FINISH ME!
+  function testRevisionAllBaseEdit() {
+    //$this->fail('Incomplete');
   }
 
-  //Test revisioning of individual basic content type
+  function testRevisionAllDrupalTypeCreate() {
+    //$this->fail('Incomplete');
+  }
 
-  //Test revisioning of individual custom content type.
+  function testRevisionAllDrupalTypeEdit() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionAllModuleTypeCreate() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionAllModuleTypeEdit() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionSelectBaseTypeCreate() {
+    $settings = get_settings(FALSE, TRUE, TRUE);
+    $settings['revision-all[revision-types][Page]'] = FALSE;
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+
+    $this->drupalGet('node/add/page');
+
+    $this->assertNoFieldChecked('edit-revision', 'Page revisioning set');
+
+    $this->drupalGet('node/add/story');
+
+    $this->assertFieldChecked('edit-revision', 'Story revisioning set');
+  }
+
+  function testRevisionSelectBaseTypeEdit() {
+    $settings = get_settings(FALSE, TRUE, TRUE);
+    $settings['revision-all[revision-types][Page]'] = FALSE;
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+
+    $node = $this->drupalCreateNode(array('type' => 'page'));
+
+    $this->drupalGet("node/{$node->nid}/edit");
+
+    $this->assertNoFieldChecked('edit-revision', 'Page revisioning set');
+
+    $node = $this->drupalCreateNode(array('type' => 'story'));
+
+    $this->drupalGet("node/{$node->nid}/edit");
+
+    $this->assertFieldChecked('edit-revision', 'Page revisioning set');
+  }
+
+  function testRevisionSelectDrupalTypeCreate() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionSelectDrupalTypeEdit() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionSelectModuleTypeCreate() {
+    //$this->fail('Incomplete');
+  }
+
+  function testRevisionSelectModuleTypeEdit() {
+    //$this->fail('Incomplete');
+  }
 }
 
-class RevisionAllEnableFutureTests extends DrupalWebTestCase {
+
+/**
+ * Tests the "Enable for all Future Content Types" feature.
+ */
+class RevisionAllEnableFutureTests extends RevisionAllBase {
   public static function getInfo() {
     return array(
       'name' => 'Future Types Tests',
@@ -110,12 +175,10 @@ class RevisionAllEnableFutureTests extends DrupalWebTestCase {
   }
 
   public function setUp() {
-    parent::setUp('revision_all', 'revision_all_test');
-
+    parent::setUp();
     $privileged_user = $this->drupalCreateUser(
-      array('administer site configuration', 'administer content types'));
+      array('administer content types'));
     $this->drupalLogin($privileged_user);
-    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
   }
 
   function testFutureContentType() {
@@ -125,10 +188,85 @@ class RevisionAllEnableFutureTests extends DrupalWebTestCase {
   }
 }
 
-class RevisionAllPreventOverrideTests extends DrupalWebTestCase {
-  //todo write tests
-  /** Prevent Revisioning Overrides **/
-  //Test prevent override for basic content type.
 
-  //Test prevent override for custom content type.
+/**
+ * Tests the Prevent Revisioning Overrides feature.
+ */
+class RevisionAllPreventOverrideTests extends RevisionAllBase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Prevent Override Tests',
+      'description' => 'Tests the "Prevent Revisioning Overrides" feature.',
+      'group' => 'Revision All',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp();
+
+    $privileged_user = $this->drupalCreateUser(array('administer nodes'));
+    $this->drupalLogin($privileged_user);
+  }
+
+  function has_disabled_revisions() {
+    $trace = debug_backtrace();
+    $caller = $trace[1]['function'];
+    $this->assertRaw('<input type="checkbox" name="revision" id="edit-revision" value="1"  checked="checked"  disabled="disabled" class="form-checkbox" />', $caller . ': "Create new revision" disabled');
+  }
+
+  function create_custom_content_type($type = 'custom_content') {
+    $settings = array(
+      'type' => $type,
+    );
+
+    $this->drupalCreateContentType($settings);
+
+    return $settings;
+  }
+
+  function testPreventsBaseContentTypeCreate() {
+    $this->drupalGet('node/add/page');
+
+    $this->has_disabled_revisions();
+  }
+
+  function testPreventBaseContentTypeEdit() {
+    $node = $this->drupalCreateNode(array('type' => 'page'));
+
+    $this->drupalGet("node/{$node->nid}/edit");
+
+    $this->has_disabled_revisions();
+  }
+
+  function testPreventsDrupalCustomContentTypeCreate() {
+    $this->create_custom_content_type();
+
+    $this->drupalGet('node/add/custom-content');
+
+    $this->has_disabled_revisions();
+  }
+
+  function testPreventsDrupalCustomContentTypeEdit() {
+    $settings = $this->create_custom_content_type();
+
+    $node = $this->drupalCreateNode($settings);
+
+    $this->drupalGet("node/{$node->nid}/edit");
+
+    $this->has_disabled_revisions();
+  }
+
+  function testPreventsModuleCustomContentTypeCreate() {
+    $this->drupalGet('node/add/revision-all-test');
+
+    $this->has_disabled_revisions();
+  }
+
+  function testPreventsModuleCustomContentTypeEdit() {
+    $node = $this->drupalCreateNode(array('type' => 'revision_all_test'));
+
+    $this->drupalGet("node/{$node->nid}/edit");
+
+    $this->has_disabled_revisions();
+  }
 }
