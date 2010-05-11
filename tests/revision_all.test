@@ -1,0 +1,134 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Tests for Revision All module.
+ */
+
+function get_settings($revision_all = TRUE, $enable_future = TRUE, $prevent_override = TRUE) {
+  $settings = array();
+  $settings['revision-all[revision-all]'] = $revision_all;
+  $settings['revision-all[enable-future]'] = $enable_future;
+  $settings['revision-all[prevent-override]'] = $prevent_override;
+
+  return $settings;
+}
+
+/**
+ * Tests the basic Revision All settings.
+ */
+class RevisionAllBasicTests extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Revision All Base',
+      'description' => 'Tests to ensure the Revision All settings work correctly.',
+      'group' => 'Revision All',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('revision_all', 'revision_all_test');
+
+    $privileged_user = $this->drupalCreateUser(array('administer site configuration'));
+    $this->drupalLogin($privileged_user);
+    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
+  }
+
+  function testSettingsAccessible() {
+    $this->drupalGet('admin/content/revision-all');
+    $this->assertResponse('200', 'Settings accessible');
+    $this->assertTitle('Revision All | Drupal', 'Settings title is "Revision All"');
+
+    $this->assertFieldChecked('edit-revision-all-revision-all', '"Revision All" Checked');
+    $this->assertFieldChecked('edit-revision-all-enable-future', '"Enable for all Future Content Types" checked');
+    $this->assertNoFieldChecked('edit-revision-all-prevent-override', '"Prevent Revisioning Overrides" unchecked');
+  }
+
+  function testSettingsSaving() {
+    $settings = get_settings(FALSE, TRUE, TRUE);
+
+    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+    $this->assertText('Revisioning Set', '"Revisioning Set" message');
+
+    $settings = array();
+    $settings['revision-all'] = FALSE;
+    $settings['enable-future'] = TRUE;
+    $settings['prevent-override'] = TRUE;
+    $db_settings = variable_get('revision_all', array());
+
+    $this->assertEqual($settings, $db_settings, 'DB settings correct');
+  }
+}
+
+class RevisionAllTypeRevisioningTests extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Type Revisioning Tests',
+      'description' => 'Tests "Revision All" feature and revisioning of individual content types.',
+      'group' => 'Revision All',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('revision_all', 'revision_all_test');
+
+    $privileged_user = $this->drupalCreateUser(
+      array('administer site configuration', 'administer nodes'));
+    $this->drupalLogin($privileged_user);
+    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
+  }
+
+  /** Revision All & Subsection **/
+  //Test Revision All behavior
+  function testRevisionAllBaseTypes() {
+    $this->drupalGet('node/add/page');
+
+    $this->assertFieldChecked('edit-revision', 'Page revisioning set');
+
+    $this->drupalGet('node/add/story');
+
+    $this->assertFieldChecked('edit-revision', 'Story revisioning set');
+  }
+
+  function testRevisionAllCustomType() {
+    //todo FINISH ME!
+  }
+
+  //Test revisioning of individual basic content type
+
+  //Test revisioning of individual custom content type.
+}
+
+class RevisionAllEnableFutureTests extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Future Types Tests',
+      'description' => 'Tests the "Enable for all Future Content Types" feature.',
+      'group' => 'Revision All',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('revision_all', 'revision_all_test');
+
+    $privileged_user = $this->drupalCreateUser(
+      array('administer site configuration', 'administer content types'));
+    $this->drupalLogin($privileged_user);
+    $this->drupalPost('admin/content/revision-all', array(), 'Save configuration');
+  }
+
+  function testFutureContentType() {
+    $this->drupalGet('admin/content/types/add');
+
+    $this->assertFieldChecked('edit-node-options-revision', '"Create new revision" checked on new content type');
+  }
+}
+
+class RevisionAllPreventOverrideTests extends DrupalWebTestCase {
+  //todo write tests
+  /** Prevent Revisioning Overrides **/
+  //Test prevent override for basic content type.
+
+  //Test prevent override for custom content type.
+}
