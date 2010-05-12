@@ -272,7 +272,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
   }
 
   /**
-   * Tests module-defined content type behavior when only some content types are 
+   * Tests module-defined content type behavior when only some content types are
    * selected.
    */
   public function testRevisionSelectModuleType() {
