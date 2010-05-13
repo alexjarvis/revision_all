@@ -1,6 +1,6 @@
 ; $Id: $
 name = Revision All
-description = "Enables centralized revisioning of content"
-core = 6.x
+description = Enables centralized revisioning of content
+core = 7.x
 files[] = revision_all_test.module
 hidden = TRUE
