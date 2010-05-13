@@ -2,7 +2,9 @@
 name = Revision All
 description = Enables centralized revisioning of content
 core = 7.x
+
 files[] = revision_all.module
 files[] = revision_all.install
 files[] = tests/revision_all.test
+
 configure = admin/config/content/revision-all
