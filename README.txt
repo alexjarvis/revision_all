@@ -11,8 +11,8 @@ node forms.
 Installation
 ------------------------------------------------------------------------------
   - Copy the module files to your modules directory.
-  - Enable the module on the admin page (admin/build/modules/list)
-  - Configure Revision All settings (admin/content/revision-all).
+  - Enable the module on the admin page (admin/modules)
+  - Configure Revision All settings (admin/config/content/revision-all).
     Note: Revision All won't make any settings changes until configured and
     saved
 
