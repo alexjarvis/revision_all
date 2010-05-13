@@ -53,7 +53,7 @@ class RevisionAllBase extends DrupalWebTestCase {
    * @param array $settings The form settings to be POSTed.
    */
   protected function saveSettings($settings = array()) {
-    $this->drupalPost('admin/content/revision-all', $settings, 'Save configuration');
+    $this->drupalPost('admin/config/content/revision-all', $settings, 'Save configuration');
   }
 
   /**
@@ -101,7 +101,7 @@ class RevisionAllBasicTests extends RevisionAllBase {
    * preconfigured.
    */
   public function testSettingsAccessible() {
-    $this->drupalGet('admin/content/revision-all');
+    $this->drupalGet('admin/config/content/revision-all');
     $this->assertResponse('200', 'Settings accessible');
     $this->assertTitle('Revision All | Drupal', 'Settings title is "Revision All"');
 
@@ -151,7 +151,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * Implements setUp().
    */
   public function setUp() {
-    parent::setUp(array('administer nodes'));
+    parent::setUp(array('administer nodes', 'bypass node access'));
   }
 
   /**
@@ -195,7 +195,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $this->revisioningChecked();
 
-    $this->drupalGet('node/add/story');
+    $this->drupalGet('node/add/article');
 
     $this->revisioningChecked();
   }
@@ -226,7 +226,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    */
   public function testRevisionSelectBaseType() {
     $settings = parent::getSettings(FALSE, TRUE, TRUE);
-    $settings['revision-all[revision-types][Page]'] = FALSE;
+    $settings['revision-all[revision-types][Basic page]'] = FALSE;
 
     parent::saveSettings($settings);
 
@@ -234,7 +234,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $this->revisioningNotChecked();
 
-    $settings['revision-all[revision-types][Page]'] = TRUE;
+    $settings['revision-all[revision-types][Basic page]'] = TRUE;
 
     parent::saveSettings($settings);
 
@@ -323,7 +323,7 @@ class RevisionAllEnableFutureTests extends RevisionAllBase {
    * types.
    */
   public function testFutureContentType() {
-    $this->drupalGet('admin/content/types/add');
+    $this->drupalGet('admin/structure/types/add');
 
     $this->assertFieldChecked('edit-node-options-revision', '"Create new revision" checked on new content type');
   }
@@ -349,7 +349,7 @@ class RevisionAllPreventOverrideTests extends RevisionAllBase {
    * Implements setUp();
    */
   public function setUp() {
-    parent::setUp(array('administer nodes'));
+    parent::setUp(array('administer nodes', 'bypass node access'));
   }
 
   /**
@@ -359,7 +359,7 @@ class RevisionAllPreventOverrideTests extends RevisionAllBase {
   private function has_disabled_revisions() {
     $caller = parent::getCallingMethodName();
 
-    $this->assertRaw('<input type="checkbox" name="revision" id="edit-revision" value="1"  checked="checked"  disabled="disabled" class="form-checkbox" />', $caller . ': "Create new revision" disabled');
+    $this->assertRaw('<input type="checkbox" name="revision" id="edit-revision" value="1" checked="checked"  disabled="disabled" class="form-checkbox" />', $caller . ': "Create new revision" disabled');
   }
 
   /**
