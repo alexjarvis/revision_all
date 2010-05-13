@@ -11,7 +11,7 @@
  * Implements hook_menu().
  */
 function revision_all_menu() {
-  $items['admin/content/revision-all'] = array(
+  $items['admin/config/content/revision-all'] = array(
     'title' => 'Revision All',
     'description' => 'Configure the revisioning of content types.',
     'page callback' => 'drupal_get_form',
@@ -26,12 +26,9 @@ function revision_all_menu() {
  * Defines the settings form.
  */
 function revision_all_settings_form() {
-  $path = drupal_get_path('module', 'revision_all');
-  drupal_add_js("$path/revision_all.js");
-
   $settings = variable_get('revision_all', array());
 
-  $content_types = node_get_types('names');
+  $content_types = node_type_get_names();
 
   $form['revision-all'] = array(
     '#tree' => TRUE,
@@ -50,6 +47,11 @@ function revision_all_settings_form() {
       <em>Note</em>: Selecting "Revision All" above overrides these settings.'),
     '#type' => 'fieldset',
     '#attributes' => array('id' => 'revision-all-revision-types'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name=revision-all[revision-all]]' => array('checked' => FALSE),
+      ),
+    ),
   );
 
   while ($type = current($content_types)) {
@@ -100,7 +102,7 @@ function revision_all_settings_form() {
  *  The state of the form upon submission.
  */
 function revision_all_settings_form_submit(&$form, &$form_state) {
-  $content_types = node_get_types('names');
+  $content_types = node_type_get_names();
   $revision_all = $form_state['values']['revision-all']['revision-all'];
   $revision_types = $form_state['values']['revision-all']['revision-types'];
 
@@ -157,7 +159,7 @@ function revision_all_form_node_type_form_alter(&$form, &$form_state) {
 function revision_all_form_alter(&$form, &$form_state, $form_id) {
   $settings = variable_get('revision_all', array());
 
-  if ($form['#id'] == 'node-form') {
+  if (!empty($form['#node_edit_form'])) {
     if ($settings['revision-all']) {
       $form['revision_information']['revision']['#default_value'] = TRUE;
     }
