@@ -115,9 +115,9 @@ class RevisionAllBasicTests extends RevisionAllBase {
    * the form is submitted.
    */
   public function testSettingsSaving() {
-    $settings = parent::getSettings(FALSE, TRUE, FALSE);
+    $settings = $this->getSettings(FALSE, TRUE, FALSE);
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->assertText('Revisioning Set', '"Revisioning Set" message');
 
@@ -204,7 +204,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * Tests custom content type behavior when 'Revision All' is checked.
    */
   public function testRevisionAllCustomType() {
-    parent::createCustomContentType();
+    $this->createCustomContentType();
 
     $this->drupalGet('node/add/custom-content');
 
@@ -225,10 +225,10 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * selected.
    */
   public function testRevisionSelectBaseType() {
-    $settings = parent::getSettings(FALSE, TRUE, TRUE);
+    $settings = $this->getSettings(FALSE, TRUE, TRUE);
     $settings['revision-all[revision-types][Basic page]'] = FALSE;
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/page');
 
@@ -236,7 +236,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $settings['revision-all[revision-types][Basic page]'] = TRUE;
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/page');
 
@@ -248,15 +248,15 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * selected.
    */
   public function testRevisionSelectCustomType() {
-    parent::createCustomContentType();
+    $this->createCustomContentType();
 
-    $settings = parent::getSettings(FALSE, TRUE, TRUE);
-    parent::saveSettings($settings);
+    $settings = $this->getSettings(FALSE, TRUE, TRUE);
+    $this->saveSettings($settings);
 
     $settings['revision-all[revision-types][Custom Content]'] = FALSE;
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/custom-content');
 
@@ -264,7 +264,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $settings['revision-all[revision-types][Custom Content]'] = TRUE;
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/custom-content');
 
@@ -276,10 +276,10 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * selected.
    */
   public function testRevisionSelectModuleType() {
-    $settings = parent::getSettings(FALSE, TRUE, TRUE);
+    $settings = $this->getSettings(FALSE, TRUE, TRUE);
     $settings['revision-all[revision-types][revision_all_test page]'] = FALSE;
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/revision-all-test');
 
@@ -287,7 +287,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
 
     $settings['revision-all[revision-types][revision_all_test page]'] = TRUE;
 
-    parent::saveSettings($settings);
+    $this->saveSettings($settings);
 
     $this->drupalGet('node/add/revision-all-test');
 
@@ -375,7 +375,7 @@ class RevisionAllPreventOverrideTests extends RevisionAllBase {
    * Tests custom content type "Create new revision" behavior.
    */
   public function testPreventsOverrideCustomType() {
-    parent::createCustomContentType();
+    $this->createCustomContentType();
 
     $this->drupalGet('node/add/custom-content');
 
