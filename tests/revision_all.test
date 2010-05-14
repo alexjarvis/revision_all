@@ -11,13 +11,19 @@
  */
 class RevisionAllBase extends DrupalWebTestCase {
   /**
-   * Implements setUp.
+   * Implements setUp().
+   */
+  public function setUp() {
+    $this->setUpTests(array());
+  }
+
+  /**
    * Creates a user with 'administer site configuration' permissions as well as
    * any other permissions passed in. Also enables all revision_all settings.
    *
    * @param array $permissions Additional permission to be granted to the user.
    */
-  public function setUp($permissions = array()) {
+  public function setUpTests($permissions = array()) {
     parent::setUp('revision_all', 'revision_all_test');
 
     $permissions[] = 'administer site configuration';
@@ -88,7 +94,7 @@ class RevisionAllBasicTests extends RevisionAllBase {
   /**
    * Implements getInfo().
    */
-  public public static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Revision All Base',
       'description' => 'Tests to ensure the Revision All settings work correctly.',
@@ -151,7 +157,7 @@ class RevisionAllTypeRevisioningTests extends RevisionAllBase {
    * Implements setUp().
    */
   public function setUp() {
-    parent::setUp(array('administer nodes', 'bypass node access'));
+    $this->setUpTests(array('administer nodes', 'bypass node access'));
   }
 
   /**
@@ -315,7 +321,7 @@ class RevisionAllEnableFutureTests extends RevisionAllBase {
    * Implements setUp();
    */
   public function setUp() {
-    parent::setUp(array('administer content types'));
+    $this->setUpTests(array('administer content types'));
   }
 
   /**
@@ -349,7 +355,7 @@ class RevisionAllPreventOverrideTests extends RevisionAllBase {
    * Implements setUp();
    */
   public function setUp() {
-    parent::setUp(array('administer nodes', 'bypass node access'));
+    $this->setUpTests(array('administer nodes', 'bypass node access'));
   }
 
   /**
